@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "env": {
+    "FIREBASE_CONFIG_B64": "@firebase_config_b64",
+    "FIREBASE_DATABASE_URL": "@firebase_database_url"
+  }
+}
