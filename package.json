@@ -1,0 +1,10 @@
+```json
+{
+  "name": "liga-ranking-api",
+  "version": "1.0.0",
+  "description": "API para obtener ranking desde Firebase Realtime Database",
+  "main": "api/ranking.js",
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}
