@@ -1,19 +1,13 @@
-/**
- * API Serverless para obtener ranking desde Firebase Realtime Database
- * Estructura esperada: /Equipos/{nombreEquipo}/{activo, nombre, score}
- * Deploy en: Vercel, Netlify, o similar
- *
- * Variables de entorno requerida:
- * - FIREBASE_CONFIG_B64: Configuración de Firebase en Base64
- * - FIREBASE_DATABASE_URL: URL de la base de datos Realtime
- */
-
 import admin from 'firebase-admin';
 
 let db;
 
 const initializeFirebase = () => {
-  if (db) return;
+  // Verificar si ya está inicializado
+  if (admin.apps.length > 0) {
+    db = admin.database();
+    return;
+  }
 
   try {
     const configB64 = process.env.FIREBASE_CONFIG_B64;
@@ -40,18 +34,15 @@ const initializeFirebase = () => {
 };
 
 export default async (req, res) => {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Responder a preflight requests
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
 
-  // Solo GET permitido
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Método no permitido' });
     return;
@@ -60,7 +51,6 @@ export default async (req, res) => {
   try {
     initializeFirebase();
 
-    // Obtener todos los equipos desde /Equipos
     const snapshot = await db.ref('Equipos').once('value');
     const equiposData = snapshot.val();
 
@@ -68,11 +58,9 @@ export default async (req, res) => {
       return res.status(200).json([]);
     }
 
-    // Procesar y filtrar equipos activos
     const ranking = [];
 
     Object.entries(equiposData).forEach(([equipoKey, equipoData]) => {
-      // Solo incluir equipos activos
       if (equipoData.activo === true) {
         ranking.push({
           id: equipoKey,
@@ -83,7 +71,6 @@ export default async (req, res) => {
       }
     });
 
-    // Ordenar por score descendente
     ranking.sort((a, b) => b.score - a.score);
 
     res.status(200).json(ranking);
